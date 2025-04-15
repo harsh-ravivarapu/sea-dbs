@@ -24,7 +24,7 @@ function [beta_vec, EI, CTX_workspace] = rl_BGM_step_SMC_pulse_python_step(tmax,
 % updated creatdbs to creatdbs2
 
 % Random
-rng (123);
+rng shuffle;
 
 n = 10;             % number of neurons in each nucleus (orig 10)
 %dt = 0.01;          % ms

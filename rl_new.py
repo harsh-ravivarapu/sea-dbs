@@ -18,7 +18,7 @@ os.environ["WANDB_SILENT"] = "true"
 TRAINING_MODE = "baseline"
 
 # ===========================
-# ✅ Brain Class (Environment)
+#  Brain Class (Environment)
 # ===========================
 class Brain(gym.Env):
     def __init__(self, freq, l, b, time_step, stride, window_size, n_obs, action_dim):
@@ -76,7 +76,7 @@ class Brain(gym.Env):
         self.eng.quit()
         
 # ===========================
-# ✅ Actor Class
+#  Actor Class
 # ===========================
 class Actor(nn.Module):
     def __init__(self, state_dim=2, state_len=100, action_dim=2, shrink_dim=4):
@@ -145,7 +145,7 @@ class Actor(nn.Module):
         torch.quantization.fuse_modules(self, [['conv1', 'relu'], ['conv2', 'relu']], inplace=True)
         
 # ===========================
-# ✅ Critic Class
+#  Critic Class
 # ===========================
 class Critic(nn.Module):
     def __init__(self, state_dim=2, state_len=100, action_dim=2, shrink_dim=4):
@@ -211,7 +211,7 @@ class Critic(nn.Module):
         torch.quantization.fuse_modules(self, [['conv1', 'relu'], ['conv2', 'relu']], inplace=True)
 
 # ===========================
-# ✅ Replay Buffer
+#  Replay Buffer
 # ===========================
 class ReplayBuffer:
     def __init__(self, state_dim, state_len, action_dim, max_size):
@@ -224,7 +224,7 @@ class ReplayBuffer:
         self.a = np.zeros((self.max_size, state_len), dtype=np.float32)
         self.a_logit = np.zeros((self.max_size, action_dim * state_len), dtype=np.float32)
         self.r = np.zeros((self.max_size, 1), dtype=np.float32)
-        self.pred_r = np.zeros((self.max_size, 1), dtype=np.float32)  # ✅ Store predicted reward
+        self.pred_r = np.zeros((self.max_size, 1), dtype=np.float32)  #  Store predicted reward
         self.s_ = np.zeros((self.max_size, state_dim, state_len), dtype=np.float32)
         self.dw = np.zeros((self.max_size, 1), dtype=np.float32)
         
@@ -235,7 +235,7 @@ class ReplayBuffer:
         self.a[idx] = a
         self.a_logit[idx] = a_logit
         self.r[idx] = r
-        self.pred_r[idx] = pred_r  # ✅ Store predicted reward
+        self.pred_r[idx] = pred_r  #  Store predicted reward
         self.s_[idx] = s_
         self.dw[idx] = dw
         
@@ -250,13 +250,13 @@ class ReplayBuffer:
         batch_a = torch.tensor(self.a[index], dtype=torch.float32)
         batch_a_logit = torch.tensor(self.a_logit[index], dtype=torch.float32)
         batch_r = torch.tensor(self.r[index], dtype=torch.float32)
-        batch_pred_r = torch.tensor(self.pred_r[index], dtype=torch.float32)  # ✅ Include predicted reward
+        batch_pred_r = torch.tensor(self.pred_r[index], dtype=torch.float32)  #  Include predicted reward
         batch_s_ = torch.tensor(self.s_[index], dtype=torch.float32)
         batch_dw = torch.tensor(self.dw[index], dtype=torch.float32)
         
         return batch_s, batch_a, batch_a_logit, batch_r, batch_pred_r, batch_s_, batch_dw
 # ===========================
-# ✅ Gumbel Softmax for Exploration (with Annealing)
+#  Gumbel Softmax for Exploration (with Annealing)
 # ===========================
 
 # Annealing parameters
@@ -292,7 +292,7 @@ def gumbel_softmax(logits, tau):
     return F.softmax(gumbel_logits, dim=-1)  # Compute probabilities
 
 # ===========================
-# ✅ Main Function
+#  Main Function
 # ===========================
 def main():
     seed = 0
@@ -364,7 +364,7 @@ def main():
     for episode in range(max_episodes):
         print(f"Episode {episode}")
         s = env.reset()
-        s = np.expand_dims(s, axis=0)  # ✅ Ensure correct shape (1, state_dim, state_len)
+        s = np.expand_dims(s, axis=0)  #  Ensure correct shape (1, state_dim, state_len)
         done = False
         r_list = []
         beta_list = []
@@ -374,7 +374,7 @@ def main():
             # === Convert state to PyTorch tensor ===
             s_tensor = torch.tensor(np.array(s), dtype=torch.float32).to(device).squeeze(0)
             
-            # ✅ Compute annealed tau before action selection
+            #  Compute annealed tau before action selection
             tau_t = get_tau(total_steps)
             
             # === Select Action ===
@@ -386,14 +386,14 @@ def main():
                 a = np.expand_dims(a, axis=0)
                 logits = np.zeros((action_dim * n_obs))
             else:
-                # ✅ Get action and logits separately
+                #  Get action and logits separately
                 a, logits = agent.choose_action(s_tensor)
                 
-                # ✅ Ensure logits is a NumPy array
+                #  Ensure logits is a NumPy array
                 if isinstance(logits, torch.Tensor):
                     logits = logits.cpu().detach().numpy()
                     
-                # ✅ Fix logits shape before storing
+                #  Fix logits shape before storing
                 expected_logits_shape = (action_dim * n_obs,)  # (50 * 1000 = 50000)
                 logits_resized[:] = logits[:expected_logits_shape[0]]
                 
@@ -404,13 +404,13 @@ def main():
                 elif logits.size < expected_logits_shape[0]:
                     logits_resized[:logits.shape[0]] = logits  # Fill available values
                     
-                # ✅ Convert logits to tensor for Gumbel-Softmax
+                #  Convert logits to tensor for Gumbel-Softmax
                 logits_tensor = torch.tensor(logits_resized, dtype=torch.float32, device=device)
                 
-                # ✅ Sample action using annealed tau
+                #  Sample action using annealed tau
                 a = gumbel_softmax(logits_tensor, tau_t).cpu().numpy()
                 
-            # ✅ Ensure action has correct shape
+            #  Ensure action has correct shape
             if a.shape[0] != action_dim:
                 a = np.random.randint(2, size=action_dim)
             a = np.expand_dims(a, axis=0)
@@ -423,15 +423,15 @@ def main():
             s_, r, done, _ = env.step(a)
             s_ = np.expand_dims(s_, axis=0)
             
-            # ✅ Extract `beta` from the state
+            #  Extract `beta` from the state
             beta = np.mean(s_[0, :])
             ei = 0
             
-            # ✅ Fix action shape before storing in replay buffer
+            #  Fix action shape before storing in replay buffer
             a_resized = np.zeros(n_obs)
             a_resized[:action_dim] = a
             
-            # ✅ Store in Replay Buffer with corrected logits shape
+            #  Store in Replay Buffer with corrected logits shape
             replay_buffer.store(s, a_resized, logits_resized, r, predicted_r, s_, done)
             
             s = s_  # Update state
@@ -439,7 +439,7 @@ def main():
             beta_list.append(beta)
             ei_list.append(ei)
             
-            # ✅ Update total steps for annealing
+            #  Update total steps for annealing
             total_steps += 1
             
             # === Train the Model ===
@@ -448,13 +448,13 @@ def main():
                 
             print(f"Step {step}, reward: {r:.3f}, predicted reward: {predicted_r:.3f}, beta: {beta:.3f}, ei: {ei:.3f}")
             
-            # ✅ Log metrics to WandB
+            #  Log metrics to WandB
             wandb.log({
                 "reward": r,
                 "predicted_reward": predicted_r,
                 "beta": beta,
                 "ei": ei,
-                "tau": tau_t,  # ✅ Log tau for debugging
+                "tau": tau_t,  #  Log tau for debugging
                 "step": step,
                 "episode": episode
             })

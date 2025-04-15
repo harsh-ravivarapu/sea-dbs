@@ -1,0 +1,7 @@
+# command ---> pip install -r requirements.txt
+numpy
+scipy
+torch
+gym
+wandb
+matlabengine # Please note that matlab.engine might require a manual install in MATLAB

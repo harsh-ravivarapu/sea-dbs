@@ -20,7 +20,7 @@ function [beta_vec, EI, CTX_workspace] = rl_BGM_reset_SMC_pulse_python_step(tmax
 % updated creatdbs to creatdbs2
 
 % each reset is a "new brain", that is, it is different than the last reset
-rng (123); 
+rng shuffle; 
 
 n = 10;             % number of neurons in each nucleus (orig 10)
 %dt = 0.01;          % ms

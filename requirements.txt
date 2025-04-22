@@ -1,7 +1,8 @@
-# command ---> pip install -r requirements.txt
+#command ---> pip install -r requirements.txt
+
 numpy
 scipy
 torch
 gym
 wandb
-matlabengine # Please note that matlab.engine might require a manual install in MATLAB
+matlabengine==24.2.1  # Compatible with MATLAB R2024b. Make sure MATLAB is installed and accessible via LD_LIBRARY_PATH (check https://pypi.org/project/matlabengine -> version histoy for comapatable version)
